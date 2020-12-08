@@ -33,10 +33,11 @@ public class WorkerImpl implements Worker {
 			this.m.map(this.reader, this.writer);
             
             //Envoyer le callback qui previent du map fini
-			//TODO!!!!!!
+			//TODO
+			//this.cb.onMessage(idMachine)
 			
 			this.reader.close();
-            this.writer.close();
+			this.writer.close();
             
 		}
     	
