@@ -34,7 +34,7 @@ public class WorkerImpl implements Worker {
             
             //Envoyer le callback qui previent du map fini
 			//TODO
-			//this.cb.onMessage(idMachine)
+			this.cb.incr();
 			
 			this.reader.close();
 			this.writer.close();
@@ -43,8 +43,7 @@ public class WorkerImpl implements Worker {
     	
     }
     public void runMap(Mapper m, Format reader, Format writer, CallBack cb) throws RemoteException {
-        m.map(reader, writer);
-       
+        
         Thread t = new Thread(new doMap(m, reader, writer, cb));
         // Lancement thread
         t.start();
