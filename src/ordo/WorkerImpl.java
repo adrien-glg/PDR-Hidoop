@@ -8,6 +8,8 @@ import java.rmi.registry.LocateRegistry;
 
 import formats.Format;
 
+import configuration.Setup;
+
 public class WorkerImpl implements Worker {
     
     public WorkerImpl() {
@@ -50,8 +52,14 @@ public class WorkerImpl implements Worker {
     }
     
     public static void main(String args[]) throws RemoteException, MalformedURLException {
-    	int port = 1234;
-    	LocateRegistry.createRegistry(port);
-    	Naming.rebind("ADRESSE A DEFINIR!!!!", new WorkerImpl());
+		int indiceMach = Integer.parseInt(args[0]);
+		String idMach = Setup.listeMachines[indiceMach];
+		int port = Setup.listePorts[indiceMach];
+		LocateRegistry.createRegistry(port);
+		//Modele : Naming.rebind("//melofee.enseeiht.fr:4000/Worker", new WorkerImpl());
+		Naming.rebind("//" + idMach + ":" + port + "/Worker", new WorkerImpl());
+		System.out.println("WorkerImpl " + indiceMach + " bound in registry");
     }
 }
+
+
