@@ -21,7 +21,7 @@ public class HdfsClient {
 	{
 	    // Récupérer le fichier, calculer le nombre de fragments.
 	    // PATH, tab_serveurs sont des variables définies dans config/Parametres.java 
-	    File f = new File (path + localFSSourceFname);
+	    File f = new File (PATH + localFSSourceFname);
 	    long taille_fichier = f.length;
 	    int nombre_fragments = tab_serveurs.length;
 	    
@@ -29,7 +29,7 @@ public class HdfsClient {
 	
 	    if (fmt == Type.LINE)
 	    {
-                LineFormat fichier = new LineFormat(path+localFSSourceFname);
+                LineFormat fichier = new LineFormat(localFSSourceFname);
                 fichier.open(Format.OpenMode.R);
 	        for (int i = 0 ; i < nombre_fragments ; i++)
 	        {
@@ -60,7 +60,10 @@ public class HdfsClient {
 		fichier.close();
             }
 	    
-
+	    else if (fmt == Type.KV)
+	    {
+	        KV fichier = new LineFormat(localFSSourceFname);
+	    }
 	}
 
     public static void HdfsRead(String hdfsFname, String localFSDestFname) { }
