@@ -31,7 +31,18 @@ public class HdfsClient {
         System.out.println("Usage: java HdfsClient delete <file>");
     }
 	
-    public static void HdfsDelete(String hdfsFname) {}
+    public static void HdfsDelete(String hdfsFname) {
+    	    int nombre_fragments = tab_serveurs.length;
+	    for (int i = 0; i < nombre_fragments; i++) 
+	    {
+		    Socket socket = new Socket (tab_serveurs[i], tab_ports[i]);
+		    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+		    // Commande : CMD_DELETE nom_fichier
+		    oos.writeObject("CMD_DELETE" + " " +hdfsFname);
+                    oos.close();
+                    socket.close();
+	    }
+    }
 	
     public static void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
      int repFactor) 
