@@ -60,9 +60,38 @@ public class HdfsClient {
 		fichier.close();
             }
 	    
-	    else if (fmt == Type.KV)
+	    else // fmt == Type.KV
 	    {
-	        KV fichier = new LineFormat(localFSSourceFname);
+	        KV fichier = new KVFormat(localFSSourceFname);
+		fichier.open(Format.OpenMode.R);
+		
+		for (int i = 0 ; i < nombre_fragments ; i++)
+	        {
+		    // Construire le fragment i
+		    int c = 0;
+	            String texte_fragment = "";
+		    KV kv = new KV(" ", " "); // Pour lire le fichier
+		    while (kv != null && c < taille_fragment)
+		    {
+			// Lire une ligne
+			kv = fichier.read();
+			texte_fragment += kv.v;
+			texte_fragment += "\n";
+
+			// Augmenter le compteur
+			c += kv.v.length;
+		    }
+
+		    // Envoyer le fragment i sur la machine i
+		    Socket socket = new Socket (tab_serveurs[i], tab_ports[i]);
+		    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+		    // Commande : CMD_WRITE nom_fichier&KV&texte_du_fragment
+		    oos.writeObject("CMD_WRITE" + " " + localFSSourceFname + "&KV&" + texte_fragment);
+                    
+		    oos.close();
+                    socket.close();
+		}
+		fichier.close();
 	    }
 	}
 
