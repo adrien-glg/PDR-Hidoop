@@ -20,7 +20,7 @@ public class HdfsClient {
      int repFactor) 
 	{
 	    // Récupérer le fichier, calculer le nombre de fragments.
-	    // path, taille_fragment sont des variables définies dans config/Parametres.java 
+	    // PATH, tab_serveurs sont des variables définies dans config/Parametres.java 
 	    File f = new File (path + localFSSourceFname);
 	    long taille_fichier = f.length;
 	    int nombre_fragments = tab_serveurs.length;
@@ -49,10 +49,10 @@ public class HdfsClient {
 		    }
 
 		    // Envoyer le fragment i sur la machine i
-		    Socket socket = new Socket (tab_serveurs[i], numPorts[i]);
+		    Socket socket = new Socket (tab_serveurs[i], tab_ports[i]);
 		    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-		    // Commande : CMD_WRITE&nom_fichier_f5&texte_du_fragment
-		    oos.writeObject(to_string(Commande.CMD_WRITE) + "&" + localFSSourceFname + "_f" + Integer.toString(i) + "&" + fragment);
+		    // Commande : CMD_WRITE nom_fichier&LINE&texte_du_fragment
+		    oos.writeObject("CMD_WRITE" + " " + localFSSourceFname + "&LINE&" + texte_fragment);
                     
 		    oos.close();
                     socket.close();
