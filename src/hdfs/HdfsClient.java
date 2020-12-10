@@ -33,15 +33,31 @@ public class HdfsClient {
                 fichier.open(Format.OpenMode.R);
 	        for (int i = 0 ; i < nombre_fragments ; i++)
 	        {
+		    // Construire le fragment i
 		    int c = 0;
-	            String texte_fragment;
-		    KV kv = new KV(" ", " ");
+	            String texte_fragment = "";
+		    KV kv = new KV(" ", " "); // Pour lire le fichier
 		    while (kv != null && c < taille_fragment)
 		    {
-			//TODO
+			// Lire une ligne
+			kv = fichier.read();
+			texte_fragment += kv.v;
+			texte_fragment += "\n";
+
+			// Augmenter le compteur
+			c += kv.v.length;
 		    }
-	            kv = fichier.read();
+
+		    // Envoyer le fragment i sur la machine i
+		    Socket socket = new Socket (tab_serveurs[i], numPorts[i]);
+		    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+		    // Commande : CMD_WRITE&nom_fichier_f5&texte_du_fragment
+		    oos.writeObject(to_string(Commande.CMD_WRITE) + "&" + localFSSourceFname + "_f" + Integer.toString(i) + "&" + fragment);
+                    
+		    oos.close();
+                    socket.close();
 	        }
+		fichier.close();
             }
 	    
 
