@@ -17,7 +17,35 @@ public class HdfsClient {
     public static void HdfsDelete(String hdfsFname) {}
 	
     public static void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
-     int repFactor) { }
+     int repFactor) 
+	{
+	    // Récupérer le fichier, calculer le nombre de fragments.
+	    // path, taille_fragment sont des variables définies dans config/Parametres.java 
+	    File f = new File (path + localFSSourceFname);
+	    long taille_fichier = f.length;
+	    int nombre_fragments = tab_serveurs.length;
+	    
+	    int taille_fragment = Math.ceil(taille_fichier / nombre_fragments);
+	
+	    if (fmt == Type.LINE)
+	    {
+                LineFormat fichier = new LineFormat(path+localFSSourceFname);
+                fichier.open(Format.OpenMode.R);
+	        for (int i = 0 ; i < nombre_fragments ; i++)
+	        {
+		    int c = 0;
+	            String texte_fragment;
+		    KV kv = new KV(" ", " ");
+		    while (kv != null && c < taille_fragment)
+		    {
+			//TODO
+		    }
+	            kv = fichier.read();
+	        }
+            }
+	    
+
+	}
 
     public static void HdfsRead(String hdfsFname, String localFSDestFname) { }
 
