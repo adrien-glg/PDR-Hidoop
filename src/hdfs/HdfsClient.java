@@ -123,13 +123,69 @@ public class HdfsClient {
 	    }
 	}
 
-    public static void HdfsRead(String hdfsFname, String localFSDestFname) { }
+    public static void HdfsRead(String hdfsFname, String localFSDestFname) {
+        /*Déclaraiton des OutputStream qui serviront pour envoyer la commande aux nodes*/ 
+        ObjectOutputStream[] oOutputs = new ObjectOutputStream[n];
+        /*Déclaraiton des InputStream qui serviront pour envoyer la commande aux nodes*/
+        ObjectInputStream[] oInputs = new ObjectInputStream[n];
+        /*Definition du message qui va être envoyé par le socket*/
+        String commande = "CMD_READ " + hdfsFname; 
+        /*Ouverture du fichier où on va écrire*/
+        Format fichier = (Format) new KVFormat(PATH+localFSDestFname);
+        fichier.open(OpenMode.W);
+        /*Envoi des commandes sur les sockets et initialisation*/
+        for (int i= 0;i<n;i++){
+            oOutputs[i] = new ObjectOutputStream(sockets[i].getOutputStream());
+            oInputs[i] = new ObjectInputStream(sockets[i].getInputStream());
+            /*Écriture de la commande dans le outputStream*/ 
+            oOutputs[i].writeObject(commande);
+            /*Réception du premier kv qui nous indique si le fichier est présent ds le serveur*/
+            String KVs = (String) oInputs[i].readObject();
+            Boolean kvNull = KVs == Null
+            /*Initialisation de la version classe du KV*/ 
+            KV kv = null;
+			if (kvNull) {
+				/*Si le premier KV est nul alors on sait que le serveur n'a pu envoyer aucun KV donc il a pas le fragment*/ 
+                System.out.println("Aucun fragment du fichier " + hdfsFname + " trouvé dans le serveur " + i);	
+			} else {
+				String[] k_et_s = KVs.split("<->");
+				kv = new KV(k_et_s[0], k_et_s[1]);
+			}
+			while (!kvNull) {
+				/**On écrit le kv qui n'est pas nul */
+                file.write(kv);
+                /**On reçoit le kv suivant */
+				KVs =(String) oInputs[i].readObject();
+                if (KVs == null){
+                    /**C'est la fin de la lecture des kvs pour le serveur i */
+                    kvNull = true;
+                }
+                else {
+                    /**On genere l'objet kv à partir du string kv */
+                    k_et_s = KVs.split("<->");
+                    kv = new KV(k_et_s[0], k_et_s[1]);
+                }
+                    
+			}	
+        } 
+        
+        /*Fermeture de tous les sockets et Streams utilisés ainsi que le fichier sur lequel on écrit*/  
+        fichier.close();
+        for (int i = 0;i<n;i++){
+            sockets[i].close();
+	    oOutputs[i].close();
+	    oInputs[i].close();
+        }
+
+    }
 
 	
     public static void main(String[] args) {
         // java HdfsClient <read|write> <line|kv> <file>
-
+	
         try {
+	    /*Géneration du client pour ouvrir les sockets*/
+	    this = new HdfsClient();
             if (args.length<2) {usage(); return;}
 
             switch (args[0]) {
@@ -141,7 +197,11 @@ public class HdfsClient {
                 if (args[1].equals("line")) fmt = Format.Type.LINE;
                 else if(args[1].equals("kv")) fmt = Format.Type.KV;
                 else {usage(); return;}
-                HdfsWrite(fmt,args[2],1);
+                HdfsWrite(fmt,args[2],1);break;
+	       default : usage(); 
+			 for (int i=0;i<n,i++){
+			       sockets[i].close()
+			 }
             }	
         } catch (Exception ex) {
             ex.printStackTrace();
