@@ -71,7 +71,7 @@ public class Job implements JobInterface {
 			
 		
 		//TODO ON REDUCE
-		
+		}
 		
 	}
 	
