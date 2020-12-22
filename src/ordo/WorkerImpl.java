@@ -53,11 +53,9 @@ public class WorkerImpl implements Worker {
     
     public static void main(String args[]) throws RemoteException, MalformedURLException {
 		int indiceMach = Integer.parseInt(args[0]);
-		String idMach = Setup.listeMachines[indiceMach];
-		int port = Setup.listePorts[indiceMach];
-		LocateRegistry.createRegistry(port);
-		//Modele : Naming.rebind("//melofee.enseeiht.fr:4000/Worker", new WorkerImpl());
-		Naming.rebind("//" + idMach + ":" + port + "/Worker", new WorkerImpl());
+		LocateRegistry.createRegistry(1099);
+		//Modele : Naming.rebind("//localhost/Worker", new WorkerImpl());
+		Naming.rebind("//localhost/Worker", new WorkerImpl());
 		System.out.println("WorkerImpl " + indiceMach + " bound in registry");
     }
 }
