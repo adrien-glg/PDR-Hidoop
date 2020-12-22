@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 
+import config.Project;
 import formats.Format;
 
 import configuration.Setup;
@@ -53,11 +54,12 @@ public class WorkerImpl implements Worker {
     
     public static void main(String args[]) throws RemoteException, MalformedURLException {
 		int indiceMach = Integer.parseInt(args[0]);
-		String idMach = Setup.listeMachines[indiceMach];
-		int port = Setup.listePorts[indiceMach];
+		String idMach = Project.listeMachines[indiceMach];
+		int port = Project.listePorts[indiceMach];
 		LocateRegistry.createRegistry(port);
 		//Modele : Naming.rebind("//melofee.enseeiht.fr:4000/Worker", new WorkerImpl());
-		Naming.rebind("//" + idMach + ":" + port + "/Worker", new WorkerImpl());
+		//Naming.rebind("//" + idMach + ":" + port + "/Worker", new WorkerImpl());
+		Naming.rebind("//localhost/Worker"+indiceMach, new WorkerImpl());
 		System.out.println("WorkerImpl " + indiceMach + " bound in registry");
     }
 }
