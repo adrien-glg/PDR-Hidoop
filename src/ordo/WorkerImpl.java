@@ -10,7 +10,7 @@ import java.rmi.server.UnicastRemoteObject;
 import config.Project;
 import formats.Format;
 
-import configuration.Setup;
+import config.Project;
 
 public class WorkerImpl extends UnicastRemoteObject implements Worker {
     
@@ -61,12 +61,9 @@ public class WorkerImpl extends UnicastRemoteObject implements Worker {
     
     public static void main(String args[]) throws RemoteException, MalformedURLException {
 		int indiceMach = Integer.parseInt(args[0]);
-		//String idMach = Project.listeMachines[indiceMach];
-		int port = Project.listePorts[indiceMach];
-		LocateRegistry.createRegistry(port);
-		//Modele : Naming.rebind("//melofee.enseeiht.fr:4000/Worker", new WorkerImpl());
-		//Naming.rebind("//" + idMach + ":" + port + "/Worker", new WorkerImpl());
-		Naming.rebind("//localhost/Worker"+indiceMach, new WorkerImpl());
+		LocateRegistry.createRegistry(1099);
+		//Modele : Naming.rebind("//localhost/Worker", new WorkerImpl());
+		Naming.rebind("//localhost/Worker" + indiceMach, new WorkerImpl());
 		System.out.println("WorkerImpl " + indiceMach + " bound in registry");
     }
 }

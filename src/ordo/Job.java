@@ -4,28 +4,24 @@ import java.rmi.Naming;
 import java.util.concurrent.Semaphore;
 
 import config.Project;
-import configuration.Setup;
 import formats.Format.OpenMode;
 import formats.Format.Type;
 import hdfs.HdfsClient;
 import formats.Format;
 import formats.KVFormat;
 import formats.LineFormat;
-//import hdfs.NameNode; Implant�?
 import map.MapReduce;
-
-
 public class Job implements JobInterface {
 	
 	private CallBack cb;
 	protected Type inputFormat;
 	protected String inputFile;
-	protected int nbMachine; //number of fragments �galement
+	protected int nbFrag; //number of fragments = nb of Nodes
 	private Semaphore sem;
-	//private NameNode nameNode; Node?
 	
 	public Job( ) {
 		sem = new Semaphore(0);
+		this.nbFrag = Project.listeMachines.length;
 	}
 
 	@Override
@@ -42,16 +38,15 @@ public class Job implements JobInterface {
 	@Override
 	public void startJob(MapReduce mr) {
 		
-		this.nbMachine = Project.listeMachines.length;
+		int nbMachines = nbFrag ;
 		int nbMachOccupees = 0;
 
-		
 		try {
-			cb = new CallBackImpl(this.nbMachine, sem);
+			cb = new CallBackImpl(nbFrag, sem);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-	
+		
 		while (!cb.isFinished()) {
 			try {
 				if (nbMachOccupees == this.nbMachine) {
@@ -62,40 +57,41 @@ public class Job implements JobInterface {
 					
 					//TODO ON RECUP L'ADRESSE DE DATA PART
 					//emplacements temporaires
-					//LineFormat reader = new LineFormat(Setup.PATH + Setup.DATAN7 + inFname + "@"+ idMachine);
-					LineFormat reader = new LineFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "@"+ nbMachOccupees);
+					//LineFormat reader = new LineFormat(Project.PATH + Project.DATAN7 + inFname + "@"+ idMachine);
+					LineFormat reader = new LineFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "@"+ idMachine);
 					
 					//TODO ON RECUP L'ADRESSE DE DATA TMP
-					//KVFormat writer = new KVWriter(Setup.PATH + Setup.DATAN7 + inFname + "res@"+ idMachine)
-					KVFormat writer = new KVFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "res@"+ nbMachOccupees);
+					//KVFormat writer = new KVWriter(Project.PATH + Project.DATAN7 + inFname + "res@"+ idMachine)
+					KVFormat writer = new KVFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "res@"+ idMachine);
 					
 					String idMach = Project.listeMachines[nbMachOccupees];
-					//int port = Project.listePorts[nbMachOccupees];
-					//Worker worker = (Worker) Naming.lookup("//" + idMach + ":" + port + "/Worker");
-					Worker worker = (Worker) Naming.lookup("//localhost/Worker"+nbMachOccupees);
+					int port = Project.listePorts[nbMachOccupees];
+					Worker worker = (Worker) Naming.lookup("//" + idMach + ":" + port + "/Worker");
+					
 					worker.runMap(mr, reader, writer, cb);
 					nbMachOccupees++;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
+		
 		
 		//TODO ON REDUCE
-		//On r�cup�re tous les data tmp i, dans l'ordre.
+		//On rï¿½cupï¿½re tous les data tmp, dans l'ordre.
 		//HDFSClient va lancer HDFSRead qui va nous donner ce qu'on attend
-		//On pourra le r�cuperer � l'emplacement 
+		//On pourra le rï¿½cuperer ï¿½ l'emplacement 
 		// "/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "resLu"
 		String[] args = {"read", inputFile + "res", inputFile };
 		HdfsClient.main(args);
 		
-		//On va lire le fichier des r�sultats produit pr�c�demment
-		//Format tmp = new KVFormat(Setup.PATH + Setup.DATAN7 + inputFile + "resLu");
+		//On va lire le fichier des rï¿½sultats produit prï¿½cï¿½demment
+		//Format tmp = new KVFormat(Project.PATH + Project.DATAN7 + inputFile + "resLu");
 		Format tmp = new KVFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "resLu");
 		tmp.open(OpenMode.R); 
 		
-		//On va cr�er le fichier Res qu'on aura apr�s le reduce de tmp
-		//Format Res = new KVFormat(Setup.PATH + Setup.DATAN7 + inputFile + "@res");
+		//On va crï¿½er le fichier Res qu'on aura aprï¿½s le reduce de tmp
+		//Format Res = new KVFormat(Project.PATH + Project.DATAN7 + inputFile + "@res");
+
 		Format Res = new KVFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "@res");
 		Res.open(OpenMode.W);
 		
