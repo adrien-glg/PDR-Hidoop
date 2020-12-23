@@ -63,7 +63,12 @@ public class Job implements JobInterface {
 					//TODO ON RECUP L'ADRESSE DE DATA PART
 					//emplacements temporaires
 					//LineFormat reader = new LineFormat(Setup.PATH + Setup.DATAN7 + inFname + "@"+ idMachine);
-					LineFormat reader = new LineFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "@"+ nbMachOccupees);
+					Format reader = null;
+					if (inputFormat == Format.Type.LINE) {
+						reader = new LineFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "@"+ nbMachOccupees);
+					} else {
+						reader = new KVFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "@"+ nbMachOccupees);
+					}
 					
 					//TODO ON RECUP L'ADRESSE DE DATA TMP
 					//KVFormat writer = new KVWriter(Setup.PATH + Setup.DATAN7 + inFname + "res@"+ idMachine)
