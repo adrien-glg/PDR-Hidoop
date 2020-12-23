@@ -5,15 +5,22 @@ import map.Reducer;
 import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.server.UnicastRemoteObject;
 
 import config.Project;
 import formats.Format;
 
 import configuration.Setup;
 
-public class WorkerImpl implements Worker {
+public class WorkerImpl extends UnicastRemoteObject implements Worker {
     
-    public WorkerImpl() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public WorkerImpl() throws RemoteException{
+		super();
     }
     
     public class doMap implements Runnable {
@@ -54,7 +61,7 @@ public class WorkerImpl implements Worker {
     
     public static void main(String args[]) throws RemoteException, MalformedURLException {
 		int indiceMach = Integer.parseInt(args[0]);
-		String idMach = Project.listeMachines[indiceMach];
+		//String idMach = Project.listeMachines[indiceMach];
 		int port = Project.listePorts[indiceMach];
 		LocateRegistry.createRegistry(port);
 		//Modele : Naming.rebind("//melofee.enseeiht.fr:4000/Worker", new WorkerImpl());

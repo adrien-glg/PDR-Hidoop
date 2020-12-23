@@ -20,7 +20,7 @@ public class Job implements JobInterface {
 	private CallBack cb;
 	protected Type inputFormat;
 	protected String inputFile;
-	protected int fragNb; //number of fragments = nb of Nodes
+	protected int nbMachine; //number of fragments également
 	private Semaphore sem;
 	//private NameNode nameNode; Node?
 	
@@ -42,22 +42,19 @@ public class Job implements JobInterface {
 	@Override
 	public void startJob(MapReduce mr) {
 		
-		int nbMachines = Project.listeMachines.length;
+		this.nbMachine = Project.listeMachines.length;
 		int nbMachOccupees = 0;
 
-		//NameNode NN = TODO Recupï¿½rer le NameNode
-		//fragNb = NN.length ?
-		//Rï¿½cuperer les pptï¿½s des machines
 		
 		try {
-			cb = new CallBackImpl(fragNb, sem);
+			cb = new CallBackImpl(this.nbMachine, sem);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	
 		while (!cb.isFinished()) {
 			try {
-				if (nbMachOccupees == nbMachines) {
+				if (nbMachOccupees == this.nbMachine) {
 					sem.acquire(); // On attend la terminaison d'un Map
 				} else {
 					//TODO ON PREND L'ID D'UNE MACHINE
@@ -85,7 +82,7 @@ public class Job implements JobInterface {
 			
 		
 		//TODO ON REDUCE
-		//On récupère tous les data tmp, dans l'ordre.
+		//On récupère tous les data tmp i, dans l'ordre.
 		//HDFSClient va lancer HDFSRead qui va nous donner ce qu'on attend
 		//On pourra le récuperer à l'emplacement 
 		// "/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "resLu"
