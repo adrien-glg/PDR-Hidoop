@@ -8,7 +8,7 @@ import java.rmi.registry.LocateRegistry;
 
 import formats.Format;
 
-import configuration.Setup;
+import config.Project;
 
 public class WorkerImpl implements Worker {
     
@@ -55,7 +55,7 @@ public class WorkerImpl implements Worker {
 		int indiceMach = Integer.parseInt(args[0]);
 		LocateRegistry.createRegistry(1099);
 		//Modele : Naming.rebind("//localhost/Worker", new WorkerImpl());
-		Naming.rebind("//localhost/Worker", new WorkerImpl());
+		Naming.rebind("//localhost/Worker" + indiceMach, new WorkerImpl());
 		System.out.println("WorkerImpl " + indiceMach + " bound in registry");
     }
 }

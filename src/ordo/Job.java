@@ -3,7 +3,7 @@ package ordo;
 import java.rmi.Naming;
 import java.util.concurrent.Semaphore;
 
-import configuration.Setup;
+import config.Project;
 import formats.Format.OpenMode;
 import formats.Format.Type;
 import hdfs.HdfsClient;
@@ -22,7 +22,7 @@ public class Job implements JobInterface {
 	
 	public Job( ) {
 		sem = new Semaphore(0);
-		this.nbFrag = Setup.listeMachines.length;
+		this.nbFrag = Project.listeMachines.length;
 	}
 
 	@Override
@@ -54,19 +54,19 @@ public class Job implements JobInterface {
 					sem.acquire(); // On attend la terminaison d'un Map
 				} else {
 					//TODO ON PREND L'ID D'UNE MACHINE
-					String idMachine = Setup.listeMachines[nbMachOccupees];
+					String idMachine = Project.listeMachines[nbMachOccupees];
 					
 					//TODO ON RECUP L'ADRESSE DE DATA PART
 					//emplacements temporaires
-					//LineFormat reader = new LineFormat(Setup.PATH + Setup.DATAN7 + inFname + "@"+ idMachine);
+					//LineFormat reader = new LineFormat(Project.PATH + Project.DATAN7 + inFname + "@"+ idMachine);
 					LineFormat reader = new LineFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "@"+ idMachine);
 					
 					//TODO ON RECUP L'ADRESSE DE DATA TMP
-					//KVFormat writer = new KVWriter(Setup.PATH + Setup.DATAN7 + inFname + "res@"+ idMachine)
+					//KVFormat writer = new KVWriter(Project.PATH + Project.DATAN7 + inFname + "res@"+ idMachine)
 					KVFormat writer = new KVFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "res@"+ idMachine);
 					
-					String idMach = Setup.listeMachines[nbMachOccupees];
-					int port = Setup.listePorts[nbMachOccupees];
+					String idMach = Project.listeMachines[nbMachOccupees];
+					int port = Project.listePorts[nbMachOccupees];
 					Worker worker = (Worker) Naming.lookup("//" + idMach + ":" + port + "/Worker");
 					
 					worker.runMap(mr, reader, writer, cb);
@@ -86,12 +86,12 @@ public class Job implements JobInterface {
 		HdfsClient.main(args);
 		
 		//On va lire le fichier des r�sultats produit pr�c�demment
-		//Format tmp = new KVFormat(Setup.PATH + Setup.DATAN7 + inputFile + "resLu");
+		//Format tmp = new KVFormat(Project.PATH + Project.DATAN7 + inputFile + "resLu");
 		Format tmp = new KVFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "resLu");
 		tmp.open(OpenMode.R); 
 		
 		//On va cr�er le fichier Res qu'on aura apr�s le reduce de tmp
-		//Format Res = new KVFormat(Setup.PATH + Setup.DATAN7 + inputFile + "@res");
+		//Format Res = new KVFormat(Project.PATH + Project.DATAN7 + inputFile + "@res");
 		Format Res = new KVFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "@res");
 		Res.open(OpenMode.W);
 		
