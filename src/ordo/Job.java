@@ -11,7 +11,6 @@ import formats.Format;
 import formats.KVFormat;
 import formats.LineFormat;
 import map.MapReduce;
-
 public class Job implements JobInterface {
 	
 	private CallBack cb;
@@ -50,7 +49,7 @@ public class Job implements JobInterface {
 		
 		while (!cb.isFinished()) {
 			try {
-				if (nbMachOccupees == nbMachines) {
+				if (nbMachOccupees == this.nbMachine) {
 					sem.acquire(); // On attend la terminaison d'un Map
 				} else {
 					//TODO ON PREND L'ID D'UNE MACHINE
@@ -78,20 +77,21 @@ public class Job implements JobInterface {
 		
 		
 		//TODO ON REDUCE
-		//On r�cup�re tous les data tmp, dans l'ordre.
+		//On rï¿½cupï¿½re tous les data tmp, dans l'ordre.
 		//HDFSClient va lancer HDFSRead qui va nous donner ce qu'on attend
-		//On pourra le r�cuperer � l'emplacement 
+		//On pourra le rï¿½cuperer ï¿½ l'emplacement 
 		// "/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "resLu"
 		String[] args = {"read", inputFile + "res", inputFile };
 		HdfsClient.main(args);
 		
-		//On va lire le fichier des r�sultats produit pr�c�demment
+		//On va lire le fichier des rï¿½sultats produit prï¿½cï¿½demment
 		//Format tmp = new KVFormat(Project.PATH + Project.DATAN7 + inputFile + "resLu");
 		Format tmp = new KVFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "resLu");
 		tmp.open(OpenMode.R); 
 		
-		//On va cr�er le fichier Res qu'on aura apr�s le reduce de tmp
+		//On va crï¿½er le fichier Res qu'on aura aprï¿½s le reduce de tmp
 		//Format Res = new KVFormat(Project.PATH + Project.DATAN7 + inputFile + "@res");
+
 		Format Res = new KVFormat("/home/dtrinh/Bureau/Hidoop" + "/data" + inputFile + "@res");
 		Res.open(OpenMode.W);
 		

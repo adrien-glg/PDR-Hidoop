@@ -5,14 +5,22 @@ import map.Reducer;
 import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.server.UnicastRemoteObject;
 
+import config.Project;
 import formats.Format;
 
 import config.Project;
 
-public class WorkerImpl implements Worker {
+public class WorkerImpl extends UnicastRemoteObject implements Worker {
     
-    public WorkerImpl() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public WorkerImpl() throws RemoteException{
+		super();
     }
     
     public class doMap implements Runnable {
