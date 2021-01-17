@@ -16,13 +16,15 @@ import java.net.Socket;
 
 public class HdfsServer extends Thread {
 	private Socket socket;
+	int numero_serveur;
 	Format file;
 	Format.Type type_fichier;
 	KV kv;
-	static String PATH = Config.PATH;
+	static String[] PATH_SERVER = Config.PATH_SERVER;
 
-	public HdfsServer(final Socket socket) {
+	public HdfsServer(final Socket socket, int numero_serveur) {
 		this.socket = socket;
+		this.numero_serveur = numero_serveur;
 	}
 
 	public static void main(final String[] args) throws IOException {
@@ -33,26 +35,26 @@ public class HdfsServer extends Thread {
 			System.out.println();
 			System.out.println();
 			System.out.println("Listening...");
-			new HdfsServer(serverSocket.accept()).start();			
+			new HdfsServer(serverSocket.accept(), Integer.parseInt(args[0])).start();			
 		}
 	}
 
 	@Override
 	public void run() {
 		try {
+			int num = this.numero_serveur;
 			System.out.println("Connexion réussie");
 			// Transfert de donnees du client au serveur
 			final ObjectInputStream objectInputStream = new ObjectInputStream(this.socket.getInputStream());
 			// Transfert de données du serveur au client
 			// final OutputStream outputOS = socket.getOutputStream();
 			// On reçoit la commande à exécuter plus le nom de fragment
-			final String[] split_commande = ((String) objectInputStream.readObject()).split(" ");
+			final String[] split_commande = ((String) objectInputStream.readObject()).split("#");
 			
-			// Une commande est de la forme CMD_WRITE nom_fichier&LINE&texte_du_fragment
+			// Une commande est de la forme CMD_WRITE$nom_fichier&LINE&texte_du_fragment
 			// On fait alors deux split successifs : l'un sur le type de la commande, l'autre sur les données fournies
 			final String typeCommande = split_commande[0];
 			final String fichier = split_commande[1];
-
 
 			switch (typeCommande) {
 			case "CMD_WRITE":
@@ -62,7 +64,8 @@ public class HdfsServer extends Thread {
 				
 				// Second split : nom_fichier&KV&clé1<->valeur1\ncle2<->valeur2\ncle3<->valeur3
 				// On commence par séparer le nom du fichier, de son type, et des donnees
-				final String[] splitFichier = fichier.split("$");
+				final String[] splitFichier = fichier.split("&");
+				final String fichier_a_ecrire = splitFichier[0];
 				final String fmt_str = splitFichier[1];
 				final Format.Type fmt = fmt_str == "LINE" ? Format.Type.LINE : Format.Type.KV;
 				final String donnees = splitFichier[2];
@@ -73,9 +76,9 @@ public class HdfsServer extends Thread {
 				
 				// On ouvre le fichier pour le préparer au travail
 				if (fmt == Format.Type.KV)
-					this.file = (Format) new KVFormat(PATH+ fichier);
+					this.file = (Format) new KVFormat(PATH_SERVER[num]+ fichier_a_ecrire);
 				else
-					this.file = new LineFormat(PATH + fichier);
+					this.file = new LineFormat(PATH_SERVER[num] + fichier_a_ecrire);
 				this.file.open(Format.OpenMode.W);
 				
 				for (String kv_str : tab_KV) {
@@ -88,7 +91,7 @@ public class HdfsServer extends Thread {
 				}
 					
 				// BufferedWriter buff = new BufferedWriter(new OutputStreamWriter(outputOS));
-				System.out.println(fichier);
+				// System.out.println(fichier);
 				// outputOS.write(1);
 				this.file.close();
 				objectInputStream.close();
@@ -101,7 +104,7 @@ public class HdfsServer extends Thread {
 				// Le split de départ suffit alors, avec fichier = nomFichier
 				// Transfert de donnees du serveur au client (read)
 				final ObjectOutputStream objectOutputStream = new ObjectOutputStream(this.socket.getOutputStream());
-				Format file = new KVFormat(PATH + fichier);
+				Format file = new KVFormat(PATH_SERVER[num] + fichier);
 				file.open(Format.OpenMode.R);
 				KV kv_a_envoyer;
 				// On renvoie chaque kv au client
@@ -117,13 +120,20 @@ public class HdfsServer extends Thread {
 				objectOutputStream.close();
 				break;
 				
+			case "CMD_DELETE":
 				
+				/* // Transfert de donnees du serveur au client (accuse de reception pour client de la suppression)
+				final ObjectOutputStream objectOutputStream1 = new ObjectOutputStream(this.socket.getOutputStream());
+				objectOutputStream1.writeObject(new File(PATH_SERVER[num]+fichier).delete());
+				objectOutputStream1.close(); */
+				File f = new File(PATH_SERVER[num]+fichier);
+				f.delete();
+				
+				objectInputStream.close();
+				break;
 				
 			default:
-				// Transfert de donnees du serveur au client (accuse de reception pour client de la suppression)
-				final ObjectOutputStream objectOutputStream1 = new ObjectOutputStream(this.socket.getOutputStream());
-				objectOutputStream1.writeObject(new File(PATH+fichier).delete());
-				objectInputStream.close();
+				System.out.println(typeCommande + " : commande inconnue");
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();

@@ -29,7 +29,7 @@ public class HdfsClient {
 			try {
 				socket = new Socket(Config.tab_serveurs[i],Config.tab_ports[i]);
 				ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-				oos.writeObject("CMD_DELETE" + " " +hdfsFname);
+				oos.writeObject("CMD_DELETE#" + hdfsFname);
 				oos.close();
 	            socket.close();
 			} catch (IOException e) {
@@ -51,7 +51,7 @@ public class HdfsClient {
 	
 	    if (fmt == Format.Type.LINE)
 	    {
-            LineFormat fichier = new LineFormat(localFSSourceFname);
+            LineFormat fichier = new LineFormat(Config.PATH + localFSSourceFname);
             fichier.open(Format.OpenMode.R);
             Socket socket;
             ObjectOutputStream oos;
@@ -62,23 +62,31 @@ public class HdfsClient {
 	            String texte_fragment = "";
 		    KV kv = new KV(" ", " "); // Pour lire le fichier
 		    
+		    // Lire la première ligne (si elle existe)
+		    kv = fichier.read();
+		    
 		    while (kv != null && c < taille_fragment)
 		    {
-				// Lire une ligne
-				kv = fichier.read();
-				texte_fragment += kv.v;
+				texte_fragment += kv.k + "<->" + kv.v;
 				texte_fragment += "\n";
 	
 				// Augmenter le compteur
 				c += kv.v.length();
-			    }
-	
+				
+				// Lire une ligne
+				kv = fichier.read();
+			}
+			if (kv != null) {
+				texte_fragment += kv.k + "<->" + kv.v;
+				texte_fragment += "\n";
+			}
 			    // Envoyer le fragment i sur la machine i
 				try {
 					socket = new Socket (Config.tab_serveurs[i], Config.tab_ports[i]);
 					oos = new ObjectOutputStream(socket.getOutputStream());
 					// Commande : CMD_WRITE nom_fichier&LINE&texte_du_fragment
-					oos.writeObject("CMD_WRITE" + " " + localFSSourceFname + "&LINE&" + texte_fragment);
+					System.out.println("CMD_WRITE#" + localFSSourceFname + "&LINE&" + texte_fragment);
+					oos.writeObject("CMD_WRITE#" + localFSSourceFname + "&LINE&" + texte_fragment);
 					oos.close();
 					socket.close();
 
@@ -118,7 +126,7 @@ public class HdfsClient {
 					socket = new Socket (Config.tab_serveurs[i], Config.tab_ports[i]);
 					oos = new ObjectOutputStream(socket.getOutputStream());
 					 // Commande : CMD_WRITE nom_fichier&KV&texte_du_fragment
-				    oos.writeObject("CMD_WRITE" + " " + localFSSourceFname + "&KV&" + texte_fragment);
+				    oos.writeObject("CMD_WRITE#" + " " + localFSSourceFname + "&KV&" + texte_fragment);
 				    oos.close();
 		            socket.close();
 				} catch (IOException e) {
@@ -142,7 +150,7 @@ public class HdfsClient {
         /*Déclaraiton des InputStream qui serviront pour envoyer la commande aux nodes*/
         ObjectInputStream[] oInputs = new ObjectInputStream[n];
         /*Definition du message qui va être envoyé par le socket*/
-        String commande = "CMD_READ " + hdfsFname; 
+        String commande = "CMD_READ#" + hdfsFname; 
         /*Ouverture du fichier où on va écrire*/
         Format fichier = (Format) new KVFormat(Config.PATH+localFSDestFname);
         fichier.open(KVFormat.OpenMode.W);
