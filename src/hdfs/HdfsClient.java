@@ -5,7 +5,13 @@ import formats.Format;
 import formats.KV;
 import formats.KVFormat;
 import formats.LineFormat;
-import configuration.Config;
+import config.Config;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class HdfsClient {
 	
@@ -16,12 +22,12 @@ public class HdfsClient {
     /*Constructeur qui permet de définir une liste de sockets en fonction du fichier configuration défini*/ 
     public HdfsClient(){
         /*Nombre de sockets à définir*/ 
-        n = Config.adresses.length;
+        n = Config.tab_serveurs.length;
         sockets = new Socket[n]; 
         /*Boucle initialisant chaque socket et réalisant une démande de connexion*/
         for (int i = 0; i<n; i++){
-            sockets[i] = new Socket(Config.adresses[i],Config.ports[i]);
-            println("Connecté à la machine" + Config.adresses[i] + " sur le port " + Config.ports[i]);
+            sockets[i] = new Socket(Config.tab_serveurs[i],Config.tab_ports[i]);
+            System.out.println("Connecté à la machine" + Config.tab_serveurs[i] + " sur le port " + Config.tab_ports[i]);
         }
     }
 
@@ -32,10 +38,10 @@ public class HdfsClient {
     }
 	
     public static void HdfsDelete(String hdfsFname) {
-    	    int nombre_fragments = tab_serveurs.length;
+    	    int nombre_fragments = Config.tab_serveurs.length;
 	    for (int i = 0; i < nombre_fragments; i++) 
 	    {
-		    Socket socket = new Socket (tab_serveurs[i], tab_ports[i]);
+		    Socket socket = new Socket (Config.tab_serveurs[i], Config.tab_ports[i]);
 		    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
 		    // Commande : CMD_DELETE nom_fichier
 		    oos.writeObject("CMD_DELETE" + " " +hdfsFname);
@@ -49,9 +55,9 @@ public class HdfsClient {
 	{
 	    // Récupérer le fichier, calculer le nombre de fragments.
 	    // PATH, tab_serveurs sont des variables définies dans config/Parametres.java 
-	    File f = new File (PATH + localFSSourceFname);
+	    File f = new File (Config.PATH + localFSSourceFname);
 	    long taille_fichier = f.length;
-	    int nombre_fragments = tab_serveurs.length;
+	    int nombre_fragments = Config.tab_serveurs.length;
 	    
 	    int taille_fragment = Math.ceil(taille_fichier / nombre_fragments);
 	
@@ -77,7 +83,7 @@ public class HdfsClient {
 		    }
 
 		    // Envoyer le fragment i sur la machine i
-		    Socket socket = new Socket (tab_serveurs[i], tab_ports[i]);
+		    Socket socket = new Socket (Config.tab_serveurs[i], Config.tab_ports[i]);
 		    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
 		    // Commande : CMD_WRITE nom_fichier&LINE&texte_du_fragment
 		    oos.writeObject("CMD_WRITE" + " " + localFSSourceFname + "&LINE&" + texte_fragment);
@@ -111,7 +117,7 @@ public class HdfsClient {
 		    }
 
 		    // Envoyer le fragment i sur la machine i
-		    Socket socket = new Socket (tab_serveurs[i], tab_ports[i]);
+		    Socket socket = new Socket (Config.tab_serveurs[i], Config.tab_ports[i]);
 		    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
 		    // Commande : CMD_WRITE nom_fichier&KV&texte_du_fragment
 		    oos.writeObject("CMD_WRITE" + " " + localFSSourceFname + "&KV&" + texte_fragment);
@@ -141,7 +147,7 @@ public class HdfsClient {
             oOutputs[i].writeObject(commande);
             /*Réception du premier kv qui nous indique si le fichier est présent ds le serveur*/
             String KVs = (String) oInputs[i].readObject();
-            Boolean kvNull = KVs == Null
+            Boolean kvNull = KVs == Null;
             /*Initialisation de la version classe du KV*/ 
             KV kv = null;
 			if (kvNull) {
@@ -199,8 +205,8 @@ public class HdfsClient {
                 else {usage(); return;}
                 HdfsWrite(fmt,args[2],1);break;
 	       default : usage(); 
-			 for (int i=0;i<n,i++){
-			       sockets[i].close()
+			 for (int i=0;i<n ; i++){
+			       sockets[i].close();
 			 }
             }	
         } catch (Exception ex) {
