@@ -1,10 +1,6 @@
-// 
-// Decompiled by Procyon v0.5.36
-// 
-
 package hdfs;
 
-import config.Project;
+import config.Config;
 import formats.KVFormat;
 import formats.LineFormat;
 
@@ -23,8 +19,7 @@ public class HdfsServer extends Thread {
 	Format file;
 	Format.Type type_fichier;
 	KV kv;
-	static String PATH = Project.PATH;
-	static String DATA = Project.DATAN7;
+	static String PATH = Config.PATH;
 
 	public HdfsServer(final Socket socket) {
 		this.socket = socket;
@@ -32,7 +27,7 @@ public class HdfsServer extends Thread {
 
 	public static void main(final String[] args) throws IOException {
 		@SuppressWarnings("resource")
-		final ServerSocket serverSocket = new ServerSocket(Project.ports[Integer.parseInt(args[0])]);
+		final ServerSocket serverSocket = new ServerSocket(Config.tab_ports[Integer.parseInt(args[0])]);
 		while (true) {
 			System.out.println();
 			System.out.println();
@@ -58,11 +53,9 @@ public class HdfsServer extends Thread {
 			final String typeCommande = split_commande[0];
 			final String fichier = split_commande[1];
 
-			Commande commande;
 
 			switch (typeCommande) {
 			case "CMD_WRITE":
-				commande = Commande.CMD_WRITE;
 				// On ouvre le fichier cree en mode ecriture afin d'y ecrire les parties du
 				// fragment
 				// On recoit le format du fichier du fragment à recevoir
@@ -70,7 +63,6 @@ public class HdfsServer extends Thread {
 				// Second split : nom_fichier&KV&clé1<->valeur1\ncle2<->valeur2\ncle3<->valeur3
 				// On commence par séparer le nom du fichier, de son type, et des donnees
 				final String[] splitFichier = fichier.split("$");
-				final String nom_fichier = splitFichier[0];
 				final String fmt_str = splitFichier[1];
 				final Format.Type fmt = fmt_str == "LINE" ? Format.Type.LINE : Format.Type.KV;
 				final String donnees = splitFichier[2];
@@ -81,9 +73,9 @@ public class HdfsServer extends Thread {
 				
 				// On ouvre le fichier pour le préparer au travail
 				if (fmt == Format.Type.KV)
-					this.file = (Format) new KVFormat(PATH + DATA + fichier);
+					this.file = (Format) new KVFormat(PATH+ fichier);
 				else
-					this.file = new LineFormat(PATH + DATA + fichier);
+					this.file = new LineFormat(PATH + fichier);
 				this.file.open(Format.OpenMode.W);
 				
 				for (String kv_str : tab_KV) {
@@ -105,12 +97,11 @@ public class HdfsServer extends Thread {
 				
 				
 			case "CMD_READ":
-				commande = Commande.CMD_READ;
 				// Dans ce cas, une commande est CMD_READ nomFichier
 				// Le split de départ suffit alors, avec fichier = nomFichier
 				// Transfert de donnees du serveur au client (read)
 				final ObjectOutputStream objectOutputStream = new ObjectOutputStream(this.socket.getOutputStream());
-				Format file = new KVFormat(PATH + DATA + fichier);
+				Format file = new KVFormat(PATH + fichier);
 				file.open(Format.OpenMode.R);
 				KV kv_a_envoyer;
 				// On renvoie chaque kv au client
@@ -130,9 +121,8 @@ public class HdfsServer extends Thread {
 				
 			default:
 				// Transfert de donnees du serveur au client (accuse de reception pour client de la suppression)
-				commande = Commande.CMD_DELETE;
 				final ObjectOutputStream objectOutputStream1 = new ObjectOutputStream(this.socket.getOutputStream());
-				objectOutputStream1.writeObject(new File(PATH+DATA+fichier).delete());
+				objectOutputStream1.writeObject(new File(PATH+fichier).delete());
 				objectInputStream.close();
 			}
 		} catch (Exception ex) {
