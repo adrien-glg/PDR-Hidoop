@@ -137,7 +137,7 @@ public class HdfsClient {
 	    }
 	}
 
-    public static void HdfsRead(String hdfsFname, String localFSDestFname) throws UnknownHostException, IOException, ClassNotFoundException {
+    public static void HdfsRead(String hdfsFname) throws UnknownHostException, IOException, ClassNotFoundException {
     	int n = Config.tab_serveurs.length;
     	Socket[] sockets = new Socket[n]; 
         /*Boucle initialisant chaque socket et réalisant une démande de connexion*/
@@ -152,7 +152,7 @@ public class HdfsClient {
         /*Definition du message qui va être envoyé par le socket*/
         String commande = "CMD_READ#" + hdfsFname; 
         /*Ouverture du fichier où on va écrire*/
-        Format fichier = (Format) new KVFormat(Config.PATH+localFSDestFname);
+        Format fichier = (Format) new KVFormat(Config.PATH+hdfsFname);
         fichier.open(KVFormat.OpenMode.W);
         /*Envoi des commandes sur les sockets et initialisation*/
         for (int i= 0;i<n;i++){
@@ -209,7 +209,7 @@ public class HdfsClient {
 	    /*Géneration du client pour ouvrir les sockets*/
             if (args.length<2) {usage(); return;}
             switch (args[0]) {
-              case "read": HdfsRead(args[1],Config.PATH + args[1]); break;
+              case "read": HdfsRead(args[1]); break;
               case "delete": HdfsDelete(args[1]); break;
               case "write": 
                 Format.Type fmt;
