@@ -46,6 +46,8 @@ public class HdfsServer extends Thread {
 			System.out.println("Connexion réussie");
 			// Transfert de donnees du client au serveur
 			final ObjectInputStream objectInputStream = new ObjectInputStream(this.socket.getInputStream());
+			
+			System.out.println("test");
 			// Transfert de données du serveur au client
 			// final OutputStream outputOS = socket.getOutputStream();
 			// On reçoit la commande à exécuter plus le nom de fragment
@@ -56,6 +58,7 @@ public class HdfsServer extends Thread {
 			final String typeCommande = split_commande[0];
 			final String fichier = split_commande[1];
 
+			System.out.println("commande : " + typeCommande);
 			switch (typeCommande) {
 			case "CMD_WRITE":
 				// On ouvre le fichier cree en mode ecriture afin d'y ecrire les parties du
@@ -106,13 +109,20 @@ public class HdfsServer extends Thread {
 				final ObjectOutputStream objectOutputStream = new ObjectOutputStream(this.socket.getOutputStream());
 				Format file = new KVFormat(PATH_SERVER[num] + fichier);
 				file.open(Format.OpenMode.R);
+				
 				KV kv_a_envoyer;
+				
+				// SI le nom du fichier finit par .kv : 
 				// On renvoie chaque kv au client
 				while ((kv_a_envoyer = file.read()) != null) {
 					String kv_str = kv_a_envoyer.k + "<->" + kv_a_envoyer.v;
 					System.out.println(kv_str);
 					objectOutputStream.writeObject(kv_str);
 				}
+				
+				// Sinon (format LINE) : on renvoie uniquement la valeur des kv (même boucle en enlevant kv.k + "<->") 
+				
+				
 				objectOutputStream.writeObject(null);
 				System.out.println("Fin de connexion");
 				file.close();

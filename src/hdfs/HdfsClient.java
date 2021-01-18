@@ -156,12 +156,21 @@ public class HdfsClient {
         fichier.open(KVFormat.OpenMode.W);
         /*Envoi des commandes sur les sockets et initialisation*/
         for (int i= 0;i<n;i++){
+			System.out.println("Récupération fichiers du serveur " + i);
             oOutputs[i] = new ObjectOutputStream(sockets[i].getOutputStream());
-            oInputs[i] = new ObjectInputStream(sockets[i].getInputStream());
+            
+            System.out.println("socket output ok");
+            
             /*Écriture de la commande dans le outputStream*/ 
+            
+            System.out.println("Envoi de la commande " + commande);
             oOutputs[i].writeObject(commande);
+            
+            oInputs[i] = new ObjectInputStream(sockets[i].getInputStream());
             /*Réception du premier kv qui nous indique si le fichier est présent ds le serveur*/
             String KVs = (String) oInputs[i].readObject();
+            System.out.println("J'ai reçu le fichier : " + KVs);
+            
             Boolean kvNull = KVs == null;
             /*Initialisation de la version classe du KV*/ 
             KV kv = null;
