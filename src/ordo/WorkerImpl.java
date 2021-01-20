@@ -45,15 +45,8 @@ public class WorkerImpl extends UnicastRemoteObject implements Worker {
 			this.writer.open(Format.OpenMode.W);
 			this.m.map(this.reader, this.writer);
 
-			// Envoyer le callback qui previent du map fini
-			// TODO
-			try {
-				this.cb.incr();
-				System.out.println("j'ai terminé incr callback");
-			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			this.cb.incr();
+			System.out.println("j'ai terminé incr callback");
 			
 			this.reader.close();
 			this.writer.close();
