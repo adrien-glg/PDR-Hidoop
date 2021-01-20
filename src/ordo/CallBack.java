@@ -4,7 +4,7 @@ import java.rmi.*;
 
 public interface CallBack extends Remote {
 	
-	public void incr();
+	public void incr() throws RemoteException ;
 	
-	public boolean isFinished();
+	public boolean isFinished() throws RemoteException;
 }
