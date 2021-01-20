@@ -1,23 +1,15 @@
 package ordo;
 
 import map.Mapper;
-import map.Reducer;
-
 import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
-
-import config.Project;
 import formats.Format;
 
-import config.Project;
 
 public class WorkerImpl extends UnicastRemoteObject implements Worker {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public WorkerImpl() throws RemoteException {
@@ -40,18 +32,15 @@ public class WorkerImpl extends UnicastRemoteObject implements Worker {
 
 		@Override
 		public void run() {
-			System.out.println("workeeeeeeer map");
 			this.reader.open(Format.OpenMode.R);
 			this.writer.open(Format.OpenMode.W);
 			this.m.map(this.reader, this.writer);
 
 			// Envoyer le callback qui previent du map fini
-			// TODO
 			try {
 				this.cb.incr();
-				System.out.println("j'ai terminé incr callback");
+				System.out.println("map terminé, incr callback");
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
@@ -72,7 +61,6 @@ public class WorkerImpl extends UnicastRemoteObject implements Worker {
 		int indiceMach = Integer.parseInt(args[0]);
 		int port = 3000 + indiceMach;
 		LocateRegistry.createRegistry(port);
-		//Modele : Naming.rebind("//localhost/Worker", new WorkerImpl());
 		Naming.rebind("//localhost:" + port + "/Worker" + indiceMach, new WorkerImpl());
 		System.out.println("WorkerImpl " + indiceMach + " bound in registry");
     }
