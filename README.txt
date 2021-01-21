@@ -1,3 +1,5 @@
+POUR LES TESTS EN LOCAL SEULEMENT!
+
 Avant de pouvoir effectuer le map reduce, on doit compiler, lancer les serveurs, lancer les Workers et enfin lancer le découpage du fichier. Pour cela simplement faire :
 bash lancerServerWorkerWrite.sh <nombre de serveurs> <nom du fichier à couper> 
 
