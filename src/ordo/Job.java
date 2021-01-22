@@ -88,8 +88,11 @@ public class Job implements JobInterface {
 		//REDUCE
 		//On récupère tous les data tmp i, dans l'ordre.
 		//HDFSClient va lancer HDFSRead qui va nous donner ce qu'on attend
-		String[] args = {"read", "inter_" + inputFile};
-		HdfsClient.main(args);
+		try {
+			HdfsClient.HdfsRead("inter_" + inputFile);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		//On va lire le fichier des résultats produit précédemment
 		Format tmp = new KVFormat(Config.PATH + "inter_" + inputFile);
