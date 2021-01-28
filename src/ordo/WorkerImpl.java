@@ -59,7 +59,7 @@ public class WorkerImpl extends UnicastRemoteObject implements Worker {
     
     public static void main(String args[]) throws RemoteException, MalformedURLException {
 		int indiceMach = Integer.parseInt(args[0]);
-		int port = 3000 + indiceMach;
+		int port = 3001 + indiceMach;
 		LocateRegistry.createRegistry(port);
 		Naming.rebind("//localhost:" + port + "/Worker" + indiceMach, new WorkerImpl());
 		System.out.println("WorkerImpl " + indiceMach + " bound in registry");
