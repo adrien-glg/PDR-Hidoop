@@ -6,6 +6,7 @@ import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import formats.Format;
+import config.Config;
 
 
 public class WorkerImpl extends UnicastRemoteObject implements Worker {
