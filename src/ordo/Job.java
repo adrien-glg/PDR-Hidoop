@@ -72,7 +72,7 @@ public class Job implements JobInterface {
 
 						int port = 3000 + nbMachOccupees + 1;
 						Worker worker = (Worker) Naming
-								.lookup("rmi://"+Config.tab_serveurs[nbMachOccupees]+":" + port + "/Worker" + (nbMachOccupees + 1));
+								.lookup("rmi://"+Config.tab_serveurs[nbMachOccupees]+":" + port + "/Worker" + (nbMachOccupees));
 
 						worker.runMap(mr, reader, writer, cb);
 						nbMachOccupees++;
