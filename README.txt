@@ -1,9 +1,12 @@
-POUR LES TESTS EN LOCAL SEULEMENT!
+Pour utiliser Hidoop:
 
-Avant de pouvoir effectuer le map reduce, on doit compiler, lancer les serveurs, lancer les Workers et enfin lancer le découpage du fichier. Pour cela simplement faire :
-bash lancerServerWorkerWrite.sh <nombre de serveurs> <nom du fichier à couper> 
-
-NB: Attention il faut vérifier que le nombre de serveur est au moins égal au nombre de serveurs dans le fichier config.Config 
-
-Ensuite pour lancer le map reduce faire:
-bash lancerMP.sh <nom du fichier>
+1- placer le fichier à traiter dans /tmp/data
+1bis - se placer dans src/
+2- mettre dans liste_ordi.txt les machines que l'on souhaite utiliser (une par ligne)
+3- bash initConfig.sh 
+4- bash runWorkerServers.sh
+5- bash installFile.sh <nom du fichier à traité placé dans /tmp/data>
+6- java application.MyMapReduce <nom du fichier à traité placé dans /tmp/data>
+7- vous pouvez maintenant récupérer le résultat dans /tmp/data ! 
+8 - IMPORTANT : bash lancerTcpShutdown.sh afin de fermer les ports TCP actifs
+sur les machines remote.
