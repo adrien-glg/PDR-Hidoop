@@ -47,7 +47,7 @@ printf '
 for k in $(seq 1 $nbLignes)
 do
     printf '"' >> "$test"
-    printf '/tmp/serv' >> "$test"
+    printf '/tmp/serv/' >> "$test"
     printf '"' >> "$test"
     if [[ "$k" -lt "$nbLignes" ]] ; then
         printf ', ' >> "$test"
